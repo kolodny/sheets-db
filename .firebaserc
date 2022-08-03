@@ -1,5 +1,5 @@
 {
   "projects": {
-    "default": "gsheets-db-service"
+    "default": "app-g-sheets"
   }
 }

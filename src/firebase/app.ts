@@ -1,28 +1,16 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-
-// import {signInWithRedirect, GoogleAuthProvider, getAuth } from 'firebase/auth';
-
-
+import { initializeApp } from 'firebase/app';
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyDx7-8hH5YoG-nTw9EGEjeC2Zok0ItgU2M",
-  authDomain: "gsheets-db-service.firebaseapp.com",
-  databaseURL: "https://gsheets-db-service-default-rtdb.firebaseio.com",
-  projectId: "gsheets-db-service",
-  storageBucket: "gsheets-db-service.appspot.com",
-  messagingSenderId: "988509801158",
-  appId: "1:988509801158:web:61f5800211351474c325c7",
-  measurementId: "G-KXZQJ48DZV"
+  apiKey: 'AIzaSyDxI-4STq4kZdo-xGlCL5qEXt6bstnUBy4',
+  authDomain: 'app-g-sheets.firebaseapp.com',
+  projectId: 'app-g-sheets',
+  storageBucket: 'app-g-sheets.appspot.com',
+  messagingSenderId: '721134805434',
+  appId: '1:721134805434:web:d4306953594fc627cc7d83',
+  measurementId: 'G-H05G2BY6FL',
 };
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
-
-// const provider = new GoogleAuthProvider();
-// // provider.addScope('profile');
-// // provider.addScope('email');
-// const auth = getAuth();
-// export const foo = signInWithRedirect(auth, provider);

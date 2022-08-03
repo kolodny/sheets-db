@@ -1,6 +1,16 @@
 {
   "rules": {
-    ".read": "now < 1662004800000",  // 2022-9-1
-    ".write": "now < 1662004800000",  // 2022-9-1
+    ".read": "auth.token.email == 'g.sheets.app@gmail.com'",
+    ".write": "auth.token.email == 'g.sheets.app@gmail.com'",
+    "users": {
+      "$uid": {
+        ".validate": "newData.hasChildren(['email'])",
+        ".read": "auth.uid == $uid",
+        ".write": "auth.uid == $uid",
+        "email": {
+          ".validate": "newData.val() === auth.token.email"
+        }
+      }
+    }
   }
 }
