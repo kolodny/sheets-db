@@ -1,9 +1,7 @@
-// Import the functions you need from the SDKs you need
-
-import {signInWithPopup, GoogleAuthProvider, getAuth } from 'firebase/auth';
-
+import { signInWithPopup, GoogleAuthProvider, getAuth } from 'firebase/auth';
 
 const provider = new GoogleAuthProvider();
 provider.addScope('email');
-const auth = getAuth();
-export const foo = signInWithPopup(auth, provider);
+export const auth = getAuth();
+export const signIn = () => signInWithPopup(auth, provider);
+export const signOut = () => auth.signOut();
