@@ -1,5 +1,6 @@
 import './firebase/app';
 import { getAuth, getRedirectResult } from 'firebase/auth';
+import { signInRedirect } from './firebase';
 
 const open = () => {
   const width = 500;
@@ -17,12 +18,20 @@ const open = () => {
 
 (window as any).open2 = open;
 
-getRedirectResult(getAuth()).then(async (userCredential) => {
+const params = new URLSearchParams(window.location.search);
+const origin = params.get('origin');
+if (origin) {
+  const userCredential = await getRedirectResult(getAuth());
   if (userCredential) {
-    // Do some DB stuff
-    close();
-    return;
+    const token = params.get('token');
+    window.opener.postMessage({ type: 'login', token }, origin);
+  } else {
+    const token = crypto.randomUUID();
+    // Google will redirect back with the URL token param.
+    history.pushState(null, '', `${location.search}&token=${token}`);
+    signInRedirect();
   }
+} else {
   const React = await import('react');
   const ReactDOM = await import('react-dom/client');
   const { App } = await import('./app');
@@ -32,4 +41,4 @@ getRedirectResult(getAuth()).then(async (userCredential) => {
       <App />
     </React.StrictMode>
   );
-});
+}

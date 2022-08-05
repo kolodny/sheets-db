@@ -3,12 +3,13 @@ import { Button } from '@mui/material';
 import {
   auth,
   signInRedirect,
-  signIn,
+  signIn as fbSignIn,
   useUser,
   signOut,
   useDB,
 } from './firebase';
 import { getRedirectResult } from 'firebase/auth';
+import { signIn } from './sdk';
 
 setTimeout(() => {
   getRedirectResult(auth).then(
@@ -34,6 +35,7 @@ export const App: React.FunctionComponent = () => {
   const writeData = user && (
     <Button
       variant="outlined"
+      style={{ marginLeft: 8 }}
       onClick={() => {
         db.setValue({
           ok: Math.random(),
@@ -47,10 +49,14 @@ export const App: React.FunctionComponent = () => {
   return (
     <div>
       <Button variant="contained" onClick={user ? signOut : signIn}>
-        Sign {user ? 'Out' : 'In (popup)'}
+        Sign {user ? 'Out' : 'In (SDK DEMO)'}
       </Button>
-      <Button variant="contained" onClick={user ? signOut : signInRedirect}>
-        Sign {user ? 'Out' : 'In (redirect)'}
+      <Button
+        style={{ marginLeft: 8 }}
+        variant="contained"
+        onClick={user ? signOut : fbSignIn}
+      >
+        Sign {user ? 'Out' : 'In (popup actual app)'}
       </Button>
       {writeData}
       <pre>{JSON.stringify(user, null, 2)}</pre>
