@@ -27,6 +27,9 @@ export const signIn = async () => {
         window.removeEventListener('message', onMessage);
         resolve(token);
       }
+      if (type === 'error') {
+        reject(new Error(data?.errorMessage));
+      }
     };
 
     window.addEventListener('message', onMessage);

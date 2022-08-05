@@ -1,6 +1,5 @@
 import React from 'react';
 import { getDatabase, ref, set, onValue, get } from 'firebase/database';
-import { User } from 'firebase/auth';
 
 export const useDB = <T>(path: string, deps?: React.DependencyList) => {
   const [value, _setValue] = React.useState<any>(null);
@@ -37,5 +36,5 @@ export const useDB = <T>(path: string, deps?: React.DependencyList) => {
     [dataRef]
   );
 
-  return { value, setValue, loading, error };
+  return { value, setValue, loading, error, isSetting, settingError };
 };

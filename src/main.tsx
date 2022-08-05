@@ -1,22 +1,7 @@
 import './firebase/app';
 import { getAuth, getRedirectResult } from 'firebase/auth';
 import { signInRedirect } from './firebase';
-
-const open = () => {
-  const width = 500;
-  const height = 600;
-
-  const left = screen.availWidth / 2 - width / 2;
-  const top = screen.availHeight / 2 - height / 2;
-
-  const opened = window.open(
-    'http://localhost:5173/',
-    '_blank',
-    `left=${left},top=${top},width=${width},height=${height}`
-  );
-};
-
-(window as any).open2 = open;
+import { ref, set, getDatabase } from 'firebase/database';
 
 const params = new URLSearchParams(window.location.search);
 const origin = params.get('origin');
@@ -24,6 +9,21 @@ if (origin) {
   getRedirectResult(getAuth()).then(async (userCredential) => {
     if (userCredential) {
       const token = params.get('token');
+      const { uid, email } = userCredential.user;
+      try {
+        await set(ref(getDatabase(), `/users/${uid}`), {
+          email,
+          data: {
+            token,
+          },
+        });
+      } catch (error: any) {
+        window.opener.postMessage(
+          { type: 'error', errorMessage: error?.message },
+          origin
+        );
+        return;
+      }
       window.opener.postMessage({ type: 'login', token }, origin);
     } else {
       const token = crypto.randomUUID();

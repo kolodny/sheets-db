@@ -25,11 +25,14 @@ export const App: React.FunctionComponent = () => {
 
   const userDir = useDB(`/users/${user?.uid}`, [!!user]);
   React.useEffect(() => {
-    if (!user || userDir.value) return;
+    if (!user) return;
+    if (userDir.loading) return;
+    if (userDir.error) return;
+    if (userDir.value) return;
     userDir.setValue({
       email: user.email,
     });
-  }, [user]);
+  }, [user, userDir.loading, userDir.value]);
   if (loading) return <div>Loading...</div>;
 
   const writeData = user && (
@@ -38,6 +41,7 @@ export const App: React.FunctionComponent = () => {
       style={{ marginLeft: 8 }}
       onClick={() => {
         db.setValue({
+          ...db.value,
           ok: Math.random(),
         });
       }}
