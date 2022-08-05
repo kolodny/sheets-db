@@ -4,4 +4,12 @@ import react from '@vitejs/plugin-react';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  build: {
+    emptyOutDir: false,
+    lib: {
+      entry: 'src/sdk.ts',
+      name: 'sdk',
+      fileName: 'sdk',
+    },
+  },
 });
