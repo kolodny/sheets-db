@@ -1,27 +1,11 @@
 import React from 'react';
 import { Button } from '@mui/material';
-import {
-  auth,
-  signInRedirect,
-  signIn as fbSignIn,
-  useUser,
-  signOut,
-  useDB,
-} from './firebase';
-import { getRedirectResult } from 'firebase/auth';
+import { auth, signIn as fbSignIn, useUser, signOut, useDB } from './firebase';
 import { signIn } from './sdk';
-
-setTimeout(() => {
-  getRedirectResult(auth).then(
-    (r) => console.log({ r }),
-    (e) => console.log({ e })
-  );
-}, 1000);
 
 export const App: React.FunctionComponent = () => {
   const { user, loading } = useUser(auth);
   const db = useDB(`/users/${user?.uid}/data`, [!!user]);
-  console.log(db);
 
   const userDir = useDB(`/users/${user?.uid}`, [!!user]);
   React.useEffect(() => {
@@ -33,6 +17,7 @@ export const App: React.FunctionComponent = () => {
       email: user.email,
     });
   }, [user, userDir.loading, userDir.value]);
+
   if (loading) return <div>Loading...</div>;
 
   const writeData = user && (
