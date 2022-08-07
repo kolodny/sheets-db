@@ -1,7 +1,10 @@
 import React from 'react';
 import { Button } from '@mui/material';
 import { auth, signIn as fbSignIn, useUser, signOut, useDB } from './firebase';
-import { signIn } from './sdk';
+import { signIn, getData, setData } from './sdk';
+
+(window as any).setData = setData;
+(window as any).getData = getData;
 
 export const App: React.FunctionComponent = () => {
   const { user, loading } = useUser(auth);

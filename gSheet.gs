@@ -1,0 +1,141 @@
+// url = 'https://script.google.com/macros/s/AKfycby0ZCsejTXDfPrEFLroePJdQ3khcbFrmnvCNe7w8ATNzmELAUhKINWcuOkXLbLOv6R-eg/exec';
+// await fetch(`${url}?token=sRUuw69dsCYwkRjnLtB6akaiH1X2/f0232449-83ed-487d-acaa-64ca2f011c31&id=1d3xhL_mXc-oN-if2OlZ2aklE8yetrHFzrivl1kmVUiM`, {method: 'POST', body: JSON.stringify([{foo: 123, bar: 'ok', cool: 'yeah!'}])}).then(x=>x.json())
+
+function openSheet(/** @type {string} */ sheetId, sheetName = 'Sheet1') {
+  const sheet = SpreadsheetApp.openById(sheetId);
+  const file = DriveApp.getFileById(sheetId);
+  const writers = [
+    file.getOwner().getEmail(),
+    ...file.getEditors().map((u) => u.getEmail()),
+  ];
+  const readers = [...writers, ...file.getViewers().map((u) => u.getEmail())];
+  const dataSheet = sheet.getSheetByName(sheetName) || sheet.getActiveSheet();
+  return { sheet: dataSheet, readers, writers };
+}
+
+function write(
+  /** @type {string} */ sheetId,
+  /** @type {string} */ email,
+  data,
+  sheetName = 'Sheet1'
+) {
+  const { sheet, writers } = openSheet(sheetId, sheetName);
+  if (!writers.includes(email))
+    throw new Error(`Sheet not shared with ${email} for editing`);
+
+  let rowsAsArray = data;
+  if (!Array.isArray(data[0])) {
+    rowsAsArray = [];
+    const headers = [];
+    let index = 0;
+    for (const row of data) {
+      const rowAsArray = [];
+      for (const [key, value] of Object.entries(row)) {
+        headers[index] = key;
+        rowAsArray[index] = value;
+        index++;
+      }
+      rowsAsArray.push(rowAsArray);
+    }
+    rowsAsArray.unshift(headers);
+  }
+  let range = 'A1:';
+  const column = String.fromCharCode(
+    'A'.charCodeAt(0) + rowsAsArray[0].length - 1
+  );
+  range += `${column}${rowsAsArray.length}`;
+  sheet.clear();
+  sheet.getRangeList([range]).getRanges()[0].setValues(rowsAsArray);
+}
+
+function read(
+  /** @type {string} */ sheetId,
+  /** @type {string} */ email,
+  /** @type {string} */ maxCell = undefined,
+  sheetName = 'Sheet1'
+) {
+  const { sheet, readers } = openSheet(sheetId, sheetName);
+  if (!readers.includes(email))
+    throw new Error(`Sheet not shared with ${email}`);
+
+  let range = 'A1:';
+  if (!maxCell) {
+    const lastColumn = sheet.getLastColumn();
+    const lastRow = sheet.getLastRow();
+    if (lastColumn > 26) {
+      throw new Error('Sheet too large, please specify range');
+    }
+    const column = String.fromCharCode('A'.charCodeAt(0) + lastColumn - 1);
+    range += `${column}${lastRow}`;
+  } else {
+    range += maxCell;
+  }
+  const values = sheet.getRangeList([range]);
+  const vals = values.getRanges().map((r) => r.getValues())[0];
+  const firstRow = vals[0];
+  const firstRowIsHeaders = firstRow.every((c) => c.length);
+  if (!firstRowIsHeaders) {
+    return vals;
+  } else {
+    const returns = [];
+    const headerItems = [];
+    for (const header of firstRow) {
+      headerItems.push(header);
+    }
+    for (const row of vals.slice(1)) {
+      const formattedRow = {};
+      for (const [index, header] of Object.entries(headerItems)) {
+        formattedRow[header] = row[index];
+      }
+      returns.push(formattedRow);
+    }
+    return returns;
+  }
+}
+
+function getDatabase(/** @type string */ path) {
+  if (path[0] === '/') path = path.slice(1);
+  const authToken = ScriptApp.getOAuthToken();
+  const dbURL = `https://app-g-sheets-default-rtdb.firebaseio.com/${path}.json`;
+  const url = dbURL + '?access_token=' + encodeURIComponent(authToken);
+  var response = UrlFetchApp.fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-type': 'application/json',
+      Authorization: `Bearer ${ScriptApp.getOAuthToken()}`,
+    },
+  });
+  return JSON.parse(response.getContentText());
+}
+
+function doGet(e) {
+  const { id } = e.parameter;
+  const [uid, token] = e.parameter.token.split('/');
+  const email = getDatabase(`users/${uid}/email`);
+  if (!email) throw new Error('email not found');
+  const origin = getDatabase(`users/${uid}/tokens/${token}`);
+  if (!origin) throw new Error('No access');
+
+  const returns = JSON.stringify(read(id, email));
+  return ContentService.createTextOutput(returns).setMimeType(
+    ContentService.MimeType.JAVASCRIPT
+  );
+}
+
+function doPost(e) {
+  const { id } = e.parameter;
+  const [uid, token] = e.parameter.token.split('/');
+  const email = getDatabase(`users/${uid}/email`);
+  if (!email) throw new Error('email not found');
+  const origin = getDatabase(`users/${uid}/tokens/${token}`);
+  if (!origin) throw new Error('No access');
+
+  const data = JSON.parse(e.postData.contents);
+
+  write(id, email, data);
+
+  const returns = JSON.stringify(read(id, email));
+  return ContentService.createTextOutput(returns).setMimeType(
+    ContentService.MimeType.JAVASCRIPT
+  );
+}

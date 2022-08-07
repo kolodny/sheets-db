@@ -42,7 +42,10 @@ if (origin) {
       );
       return;
     }
-    window.opener.postMessage({ type: 'login', token }, origin);
+    window.opener.postMessage(
+      { type: 'login', token: `${uid}/${token}` },
+      origin
+    );
   });
 } else {
   Promise.all([

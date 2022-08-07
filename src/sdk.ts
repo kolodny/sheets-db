@@ -1,3 +1,5 @@
+const APPS_SCRIPT_URL =
+  'https://script.google.com/macros/s/AKfycby0ZCsejTXDfPrEFLroePJdQ3khcbFrmnvCNe7w8ATNzmELAUhKINWcuOkXLbLOv6R-eg/exec';
 const TOKEN_KEY = 'SHEETS_TOKEN_KEY';
 export const getToken = () => window.localStorage.getItem(TOKEN_KEY);
 export const signIn = async () => {
@@ -49,4 +51,24 @@ export const signIn = async () => {
     opened?.close();
     opened = null;
   });
+};
+export const getData = async (sheetId: string) => {
+  const token = getToken();
+  if (!token) {
+    throw new Error('No token, did you forget to call `signIn()`?');
+  }
+  return await fetch(`${APPS_SCRIPT_URL}?token=${token}&id=${sheetId}`).then(
+    (x) => x.json()
+  );
+};
+
+export const setData = async (sheetId: string, data: Array<any>) => {
+  const token = getToken();
+  if (!token) {
+    throw new Error('No token, did you forget to call `signIn()`?');
+  }
+  return await fetch(`${APPS_SCRIPT_URL}?token=${token}&id=${sheetId}`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }).then((x) => x.json());
 };
